@@ -7,6 +7,7 @@ export default function Home() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,7 +30,27 @@ export default function Home() {
     fetchData();
   }, []);
 
-  // Fungsi untuk menangani pencarian
+  const searchCategory = async (categoryId) => {
+    setSelectedCategory(categoryId);
+    setLoading(true);
+    try {
+      if (categoryId === '') {
+        // Jika tidak ada kategori yang dipilih, tampilkan semua produk
+        const response = await fetch("http://localhost:3001/api/v1/products");
+        const data = await response.json();
+        setProducts(data.data);
+      } else {
+        // Jika kategori dipilih, filter berdasarkan kategori
+        const response = await fetch(`http://localhost:3001/api/v1/products?categoryId=${categoryId}`);
+        const data = await response.json();
+        setProducts(data.data);
+      }
+    } catch (error) {
+      console.error("Error searching products:", error);
+    }
+    setLoading(false);
+  };
+
   const handleSearch = async (e) => {
     if (e.key === 'Enter') {
       setLoading(true);
@@ -99,11 +120,20 @@ export default function Home() {
             <div className="bg-white p-4 rounded-lg">
               <h2 className="font-semibold mb-4 text-black">Category</h2>
               <div className="space-y-2">
+                <div 
+                  onClick={() => searchCategory('')}
+                  className={`cursor-pointer p-2 rounded hover:bg-gray-100 ${selectedCategory === '' ? 'bg-gray-100' : ''}`}
+                >
+                  <span className="text-black">All Categories</span>
+                </div>
                 {categories.map((category) => (
-                  <label key={category.id} className="flex items-center gap-2">
-                    <input type="checkbox" className="rounded" />
+                  <div
+                    key={category.id}
+                    onClick={() => searchCategory(category.id)}
+                    className={`cursor-pointer p-2 rounded hover:bg-gray-100 ${selectedCategory === category.id ? 'bg-gray-100' : ''}`}
+                  >
                     <span className="text-black">{category.name}</span>
-                  </label>
+                  </div>
                 ))}
               </div>
 
