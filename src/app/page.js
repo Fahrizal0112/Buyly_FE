@@ -35,12 +35,10 @@ export default function Home() {
     setLoading(true);
     try {
       if (categoryId === '') {
-        // Jika tidak ada kategori yang dipilih, tampilkan semua produk
         const response = await fetch("http://localhost:3001/api/v1/products");
         const data = await response.json();
         setProducts(data.data);
       } else {
-        // Jika kategori dipilih, filter berdasarkan kategori
         const response = await fetch(`http://localhost:3001/api/v1/products?categoryId=${categoryId}`);
         const data = await response.json();
         setProducts(data.data);
@@ -135,13 +133,6 @@ export default function Home() {
                     <span className="text-black">{category.name}</span>
                   </div>
                 ))}
-              </div>
-
-              <h2 className="font-semibold mt-6 mb-4 text-black">Price</h2>
-              <div className="space-y-4">
-                <input type="text" placeholder="Min" className="w-full px-3 py-2 border rounded-md" />
-                <input type="text" placeholder="Max" className="w-full px-3 py-2 border rounded-md" />
-                <button className="w-full bg-black text-white py-2 rounded-md">Search</button>
               </div>
             </div>
           </div>
