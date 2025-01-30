@@ -118,6 +118,13 @@ export default function Home() {
 
           {loading ? (
             <div>Loading...</div>
+          ) : products.length === 0 ? (
+            <div className="flex-1 flex items-center justify-center">
+              <div className="text-center">
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">Product with name "{searchQuery}" not found</h3>
+                <p className="text-gray-600">Sorry, the product you are looking for is not available.</p>
+              </div>
+            </div>
           ) : (
             <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {products.map((product) => (
