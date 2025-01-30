@@ -6,6 +6,7 @@ export default function Home() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -27,6 +28,21 @@ export default function Home() {
     };
     fetchData();
   }, []);
+
+  // Fungsi untuk menangani pencarian
+  const handleSearch = async (e) => {
+    if (e.key === 'Enter') {
+      setLoading(true);
+      try {
+        const response = await fetch(`http://localhost:3001/api/v1/products?name=${searchQuery}`);
+        const data = await response.json();
+        setProducts(data.data);
+      } catch (error) {
+        console.error("Error searching products:", error);
+      }
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -54,10 +70,15 @@ export default function Home() {
               type="text"
               placeholder="Search product..."
               className="w-full px-4 py-2 border rounded-md pr-10 text-black"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyPress={handleSearch}
             />
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+            <button onClick={() => handleSearch({ key: 'Enter' })} className="absolute right-3 top-1/2 -translate-y-1/2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
           </div>
           <button className="px-4 py-2 border rounded-md flex items-center gap-2">
             <span className="text-black">Filter</span>
@@ -117,6 +138,10 @@ export default function Home() {
                   <div className="p-4">
                     <h3 className="font-semibold text-black">{product.name}</h3>
                     <p className=" text-sm text-black">{product.category.name}</p>
+                    <span className="text-gray-400">
+                      Stock: {product.stock}
+                      {product.stock < 20 && <span className="text-red-500 ml-1">(Stock low!)</span>}
+                    </span>
                     <div className="flex items-center gap-1 mt-1">
                       <span className="text-yellow-400">★</span>
                       <span className="text-black">4.5</span>

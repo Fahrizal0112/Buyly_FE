@@ -4,6 +4,7 @@ const nextConfig = {
     domains: [
       'image.api.playstation.com',
       'example.com', 
+      'rexus.id',
     ],
   },
 }
