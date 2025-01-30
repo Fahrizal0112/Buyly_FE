@@ -7,7 +7,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <a href="/" className="inline-block">
-              <h2 className="text-xl font-bold mb-4 bg-gradient-to-r from-black to-gray-50 text-transparent bg-clip-text hover:opacity-100">
+              <h2 className="text-xl font-bold mb-4 bg-gradient-to-r from-black to-gray-500 text-transparent bg-clip-text hover:opacity-100">
                 Buyly
               </h2>
             </a>
