@@ -10,12 +10,24 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState({
+    type: "",
+    message: ""
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
+    setError({type: "", message: ""});
+
+    if (!email || !password) {
+      setError({
+        type: "validation",
+        message: "Email and password must be filled"
+      });
+      setLoading(false);
+      return; 
+    }
 
     try {
       const response = await fetch("http://localhost:3001/api/v1/auth", {
@@ -34,16 +46,27 @@ export default function LoginPage() {
       
       if (response.ok) {
         Cookies.set("token", data.token, { expires: 7 });
-        
         Cookies.set("userData", JSON.stringify(data.data), { expires: 7 });
-        
         window.location.href = "/";
       } else {
-        setError(data.message || "Login failed. Please check your credentials.");
+        if (data.message === "Cannot read properties of null (reading 'password')") {
+          setError({
+            type: "server",
+            message: "Password is incorrect"
+          });
+        } else {
+          setError({
+            type: "server", 
+            message: data.message || "Login failed. Please check your credentials."
+          });
+        }
       }
     } catch (error) {
       console.error("Login error:", error);
-      setError("An error occurred. Please try again.");
+      setError({
+        type: "network",
+        message: "An error occurred. Please try again."
+      });
     } finally {
       setLoading(false);
     }
@@ -82,15 +105,35 @@ export default function LoginPage() {
           </Link>
         </div>
 
+        {error.message && (
+          <div className={`mb-4 p-3 rounded-lg ${
+            error.type === "server" ? "bg-red-100 text-red-700" :
+            error.type === "network" ? "bg-orange-100 text-orange-700" :
+            error.type === "validation" ? "bg-yellow-100 text-yellow-700" : ""
+          }`}>
+            <div className="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              <span>{error.message}</span>
+            </div>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block mb-2 text-black">Email or Phone Number</label>
             <input
               type="text"
-              className="w-full p-2 border rounded text-black"
+              className={`w-full p-2 border rounded text-black ${error.type === "validation" && !email ? "border-red-500" : ""}`}
               placeholder="Enter your email or phone number"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (error.type === "validation") {
+                  setError({type: "", message: ""});
+                }
+              }}
             />
           </div>
 
@@ -98,10 +141,15 @@ export default function LoginPage() {
             <label className="block mb-2 text-black">Password</label>
             <input
               type="password"
-              className="w-full p-2 border rounded text-black"
+              className={`w-full p-2 border rounded text-black ${error.type === "validation" && !password ? "border-red-500" : ""}`}
               placeholder="Enter your password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (error.type === "validation") {
+                  setError({type: "", message: ""});
+                }
+              }}
             />
           </div>
 
@@ -114,13 +162,15 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="w-full bg-black text-white py-2 rounded mb-4"
+            className="w-full bg-black text-white py-2 rounded mb-4 hover:bg-gray-800 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={loading}
           >
-            {loading ? "Loading..." : "Login"}
-            {error && (
-              <div className="text-red-500 text-sm mt-2">{error}</div>
-            )}
+            {loading ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-5 h-5 border-t-2 border-white rounded-full animate-spin"></div>
+                <span>Processing...</span>
+              </div>
+            ) : "Login"}
           </button>
         </form>
 
@@ -129,7 +179,7 @@ export default function LoginPage() {
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <button className="flex items-center justify-center gap-2 p-2 border rounded text-black">
+          <button className="flex items-center justify-center gap-2 p-2 border rounded text-black hover:bg-gray-50 transition-all duration-300">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="20"
@@ -155,7 +205,7 @@ export default function LoginPage() {
             </svg>
             Google
           </button>
-          <button className="flex items-center justify-center gap-2 p-2 border rounded text-black">
+          <button className="flex items-center justify-center gap-2 p-2 border rounded text-black hover:bg-gray-50 transition-all duration-300">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="20"

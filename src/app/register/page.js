@@ -14,13 +14,45 @@ export default function RegisterPage() {
     confirmPassword: "",
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState({
+    type: "",
+    message: ""
+  });
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
+    setError({type: "", message: ""});
+
+    // Validasi form
+    if (!formData.fullName || !formData.username || !formData.phone || !formData.email || !formData.password || !formData.confirmPassword) {
+      setError({
+        type: "validation",
+        message: "All field must be filled"
+      });
+      setLoading(false);
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setError({
+        type: "password",
+        message: "Password and confirm password do not match"
+      });
+      setLoading(false);
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError({
+        type: "password",
+        message: "Password must be at least 6 characters"
+      });
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch("http://localhost:3001/api/v1/auth", {
         method: "POST",
@@ -40,11 +72,17 @@ export default function RegisterPage() {
           window.location.href = "/login";
         }, 3000);
       } else {
-        setError(data.message || "Registration failed. Please try again.");
+        setError({
+          type: "server",
+          message: data.message || "Registration failed. Please try again."
+        });
       }
     } catch (error) {
       console.error("Registration error:", error);
-      setError("An error occurred. Please try again.");
+      setError({
+        type: "network",
+        message: "An error occurred. Please try again."
+      });
     } finally {
       setLoading(false);
     }
@@ -55,6 +93,10 @@ export default function RegisterPage() {
       ...formData,
       [e.target.name]: e.target.value,
     });
+    // Reset error saat user mulai mengetik
+    if (error.type === "validation" || (error.type === "password" && ["password", "confirmPassword"].includes(e.target.name))) {
+      setError({type: "", message: ""});
+    }
   };
 
   return (
@@ -82,10 +124,10 @@ export default function RegisterPage() {
                 </div>
               </div>
               <div className="text-center mt-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">Registration Success</h3>
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">Register Success</h3>
                 <div className="mb-6">
                   <p className="text-gray-600 mb-2">
-                    Wellcome To Buyly {formData.fullName}! 🎉
+                    Welcome to Buyly {formData.fullName}! 🎉
                   </p>
                   <p className="text-gray-500 text-sm">
                     You will be redirected to the login page in a few seconds...
@@ -114,6 +156,22 @@ export default function RegisterPage() {
           </button>
         </div>
 
+        {error.message && (
+          <div className={`mb-4 p-3 rounded-lg ${
+            error.type === "server" ? "bg-red-100 text-red-700" :
+            error.type === "network" ? "bg-orange-100 text-orange-700" :
+            error.type === "validation" ? "bg-yellow-100 text-yellow-700" :
+            error.type === "password" ? "bg-blue-100 text-blue-700" : ""
+          }`}>
+            <div className="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              <span>{error.message}</span>
+            </div>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block mb-2 text-black">Full Name</label>
@@ -132,8 +190,8 @@ export default function RegisterPage() {
             <input
               type="text"
               name="username"
-              className="w-full p-2 border rounded text-black"
-              placeholder="Choose a username"
+              className={`w-full p-2 border rounded text-black ${error.type === "validation" && !formData.username ? "border-red-500" : ""}`}
+              placeholder="Choose username"
               value={formData.username}
               onChange={handleChange}
             />
@@ -144,8 +202,8 @@ export default function RegisterPage() {
             <input
               type="tel"
               name="phone"
-              className="w-full p-2 border rounded text-black"
-              placeholder="Enter your phone number"
+              className={`w-full p-2 border rounded text-black ${error.type === "validation" && !formData.phone ? "border-red-500" : ""}`}
+              placeholder="Enter phone number"
               value={formData.phone}
               onChange={handleChange}
             />
@@ -156,8 +214,8 @@ export default function RegisterPage() {
             <input
               type="email"
               name="email"
-              className="w-full p-2 border rounded text-black"
-              placeholder="Enter your email"
+              className={`w-full p-2 border rounded text-black ${error.type === "validation" && !formData.email ? "border-red-500" : ""}`}
+              placeholder="Enter email"
               value={formData.email}
               onChange={handleChange}
             />
@@ -168,8 +226,8 @@ export default function RegisterPage() {
             <input
               type="password"
               name="password"
-              className="w-full p-2 border rounded text-black"
-              placeholder="Create a password"
+              className={`w-full p-2 border rounded text-black ${(error.type === "validation" && !formData.password) || error.type === "password" ? "border-red-500" : ""}`}
+              placeholder="Create password"
               value={formData.password}
               onChange={handleChange}
             />
@@ -180,8 +238,8 @@ export default function RegisterPage() {
             <input
               type="password"
               name="confirmPassword"
-              className="w-full p-2 border rounded text-black"
-              placeholder="Confirm your password"
+              className={`w-full p-2 border rounded text-black ${(error.type === "validation" && !formData.confirmPassword) || error.type === "password" ? "border-red-500" : ""}`}
+              placeholder="Confirm password"
               value={formData.confirmPassword}
               onChange={handleChange}
             />
@@ -189,10 +247,15 @@ export default function RegisterPage() {
 
           <button
             type="submit"
-            className="w-full bg-black text-white py-2 rounded mb-4 hover:bg-gray-800 transition-all duration-300"
+            className="w-full bg-black text-white py-2 rounded mb-4 hover:bg-gray-800 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={loading}
           >
-            {loading ? "Loading..." : "Register"}
-            {error && <p className="text-red-500">{error}</p>}
+            {loading ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-5 h-5 border-t-2 border-white rounded-full animate-spin"></div>
+                <span>Processing...</span>
+              </div>
+            ) : "Register"}
           </button>
         </form>
       </div>
@@ -215,15 +278,15 @@ export default function RegisterPage() {
             <div className="mb-4">⭐</div>
             <h3 className="font-semibold mb-2 text-black">Reward Points</h3>
             <p className="text-sm text-gray-600">
-              Collect points from each transaction and exchange them for
-              attractive prizes
+              Collect points from each transaction and exchange for
+              attractive gifts
             </p>
           </div>
           <div className="text-center p-4">
             <div className="mb-4">🚚</div>
             <h3 className="font-semibold mb-2 text-black">Free Shipping</h3>
             <p className="text-sm text-gray-600">
-              Enjoy free shipping for purchases of a minimum amount
+              Enjoy free shipping for purchases with a minimum amount
             </p>
           </div>
           <div className="text-center p-4">
@@ -232,7 +295,7 @@ export default function RegisterPage() {
               Exclusive Notifications
             </h3>
             <p className="text-sm text-gray-600">
-              Get the first information about promotions and new products
+              Get first information about promotions and new products
             </p>
           </div>
         </div>
