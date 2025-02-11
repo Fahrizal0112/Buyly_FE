@@ -4,14 +4,49 @@ import Link from "next/link";
 import Image from "next/image";
 import Footer from "../../components/footer";
 import HeaderPolos from "../../components/headerpolos";
+import Cookies from "js-cookie";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Logika login akan diimplementasikan di sini
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch("http://localhost:3001/api/v1/auth", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "login",
+          username: email.trim(),
+          password: password.trim(),
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        Cookies.set("token", data.token, { expires: 7 });
+        
+        Cookies.set("userData", JSON.stringify(data.data), { expires: 7 });
+        
+        window.location.href = "/";
+      } else {
+        setError(data.message || "Login failed. Please check your credentials.");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setError("An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -52,7 +87,7 @@ export default function LoginPage() {
             <label className="block mb-2 text-black">Email or Phone Number</label>
             <input
               type="text"
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border rounded text-black"
               placeholder="Enter your email or phone number"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -63,7 +98,7 @@ export default function LoginPage() {
             <label className="block mb-2 text-black">Password</label>
             <input
               type="password"
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border rounded text-black"
               placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -80,8 +115,12 @@ export default function LoginPage() {
           <button
             type="submit"
             className="w-full bg-black text-white py-2 rounded mb-4"
+            disabled={loading}
           >
-            Login
+            {loading ? "Loading..." : "Login"}
+            {error && (
+              <div className="text-red-500 text-sm mt-2">{error}</div>
+            )}
           </button>
         </form>
 

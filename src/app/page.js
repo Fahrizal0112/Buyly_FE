@@ -3,6 +3,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import Header from "../components/header";
 import Footer from "../components/footer";
+import Cookies from "js-cookie";
 
 export default function Home() {
   const [products, setProducts] = useState([]);
@@ -10,7 +11,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
-
+  const [token, setToken] = useState(Cookies.get("token"));
   useEffect(() => {
     const fetchData = async () => {
       try {

@@ -1,43 +1,106 @@
 "use client";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import Cookies from "js-cookie";
 
 export default function Header() {
-  return (
-    <header className="bg-white shadow-sm py-4 px-8 flex justify-between items-center">
-      <a href="/" className="inline-block">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-black to-gray-500 text-transparent bg-clip-text hover:opacity-100">
-          Buyly
-        </h1>
-      </a>
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [userData, setUserData] = useState(null);
 
-      <div className="flex items-center gap-4">
-        <button className="flex items-center">
-          <span className="relative">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-              />
-            </svg>
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-              0
-            </span>
-          </span>
-        </button>
-        <Link href="/login" className="px-4 py-2 border rounded-md text-black">
-          Login
-        </Link>
-        <Link href="/register" className="px-4 py-2 bg-black text-white rounded-md">
-          Register
-        </Link>
+  useEffect(() => {
+    const userDataString = Cookies.get("userData");
+    if (userDataString) {
+      setUserData(JSON.parse(userDataString));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    Cookies.remove("token");
+    Cookies.remove("userData");
+    window.location.href = "/login";
+  };
+
+  return (
+    <header className="bg-white shadow-sm">
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex items-center justify-between">
+          <Link href="/" className="text-2xl font-bold text-black">
+            Buyly
+          </Link>
+
+          <div className="flex items-center gap-4">
+            {userData ? (
+              <div className="relative">
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="flex items-center gap-2 hover:bg-gray-100 rounded-full p-1"
+                >
+                  <div className="w-8 h-8 relative rounded-full overflow-hidden">
+                    <Image
+                      src={userData.photo_url || "/default-avatar.png"}
+                      alt={userData.name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <span className="text-black">{userData.name}</span>
+                  <svg
+                    className="w-4 h-4 text-gray-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
+                    <Link
+                      href="/profile"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Profile
+                    </Link>
+                    <Link
+                      href="/orders"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Pesanan Saya
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex gap-4">
+                <Link
+                  href="/login"
+                  className="text-black hover:text-gray-600"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/register"
+                  className="text-black hover:text-gray-600"
+                >
+                  Register
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </header>
   );
