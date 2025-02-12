@@ -69,10 +69,16 @@ export default function Header() {
                       Profile
                     </Link>
                     <Link
+                      href="/shop"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      My Shop
+                    </Link>
+                    <Link
                       href="/orders"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
-                      Pesanan Saya
+                      My Order
                     </Link>
                     <button
                       onClick={handleLogout}

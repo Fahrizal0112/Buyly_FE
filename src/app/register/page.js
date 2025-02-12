@@ -25,7 +25,6 @@ export default function RegisterPage() {
     setLoading(true);
     setError({type: "", message: ""});
 
-    // Validasi form
     if (!formData.fullName || !formData.username || !formData.phone || !formData.email || !formData.password || !formData.confirmPassword) {
       setError({
         type: "validation",
@@ -93,7 +92,6 @@ export default function RegisterPage() {
       ...formData,
       [e.target.name]: e.target.value,
     });
-    // Reset error saat user mulai mengetik
     if (error.type === "validation" || (error.type === "password" && ["password", "confirmPassword"].includes(e.target.name))) {
       setError({type: "", message: ""});
     }
@@ -136,7 +134,7 @@ export default function RegisterPage() {
                 <div className="flex justify-center space-x-2">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce"></div>
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{animationDelay: "0.2s"}}></div>
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{animationDelay: "0.4s"}}></div>
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{animationDelay: "10.4s"}}></div>
                 </div>
               </div>
             </div>

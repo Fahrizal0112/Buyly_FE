@@ -45,8 +45,8 @@ export default function LoginPage() {
       const data = await response.json();
       
       if (response.ok) {
-        Cookies.set("token", data.token, { expires: 7 });
         Cookies.set("userData", JSON.stringify(data.data), { expires: 7 });
+        Cookies.set("token", data.data.token, { expires: 7 });
         window.location.href = "/";
       } else {
         if (data.message === "Cannot read properties of null (reading 'password')") {
